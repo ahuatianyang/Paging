@@ -5,8 +5,12 @@ Vue.component('tabs',{
 				<div \
 					:class="tabCls(item)" \
 					v-for="(item,index) in navList" \
+					v-if="item.showPane"  \
 					@click="handleChange(index)"> \
 					{{ item.label }} \
+					<button  \
+					v-if="item.closable"  \
+					@click.stop="handleDel(item,index)">X</button>  \
 				</div> \
 			</div> \
 			<div class="tabs-content"> \
@@ -45,11 +49,12 @@ Vue.component('tabs',{
 			this.getTabs().forEach(function(pane,index){
 				_this.navList.push({
 					label: pane.label,
-					name: pane.name || index
+					name: pane.name || index,
+					closable: pane.closable,
+					showPane: pane.showPane
 				});
 				
 				if(!pane.name) pane.name = index;
-				
 				if(index === 0){
 					if(!_this.currentValue){
 						_this.currentValue = pane.name || index;
@@ -68,11 +73,20 @@ Vue.component('tabs',{
 			})
 		},
 		handleChange: function(index){
-			var nav = this.navList[index];
-			var name = nav.name;
-			this.currentValue = name;
-			this.$emit('input',name);
-			this.$emit('onclick',name);
+				var nav = this.navList[index];
+				var name = nav.name;
+				this.currentValue = name;
+				this.$emit('input',name);
+				this.$emit('onclick',name);
+		},
+		handleDel: function(item,index){
+				item.showPane = false; 
+				var tabs = this.getTabs();
+				tabs.forEach(function (tab){
+					if(tab.name === item.name){
+						tab.show = false;
+					}
+				})
 		}
 	},
 	watch:{
